@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quadratic Expressions Quiz Game</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #eef7ff, #fff5f5);
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(960px, 100%);
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: 28px;
+      box-shadow: 0 20px 50px rgba(31, 41, 55, 0.16);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: #2563eb;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1.15rem;
+      color: #4b5563;
+      margin-bottom: 32px;
+    }
+
+    .landing-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, 1fr));
+      gap: 22px;
+      margin-top: 24px;
+    }
+
+    .mode-card {
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      padding: 28px;
+      border-radius: 24px;
+      background: #ffffff;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.14);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      min-height: 190px;
+    }
+
+    .mode-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 34px rgba(37, 99, 235, 0.22);
+    }
+
+    .mode-card .emoji {
+      font-size: 2.8rem;
+      display: block;
+      margin-bottom: 14px;
+    }
+
+    .mode-card h2 {
+      color: #111827;
+      margin-bottom: 10px;
+    }
+
+    .mode-card p {
+      font-size: 1rem;
+      line-height: 1.45;
+      color: #4b5563;
+      margin: 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .timer {
+      color: #16a34a;
+      font-weight: 800;
+      font-size: 1.3rem;
+      white-space: nowrap;
+      background: #ecfdf5;
+      border: 2px solid #bbf7d0;
+      padding: 10px 14px;
+      border-radius: 999px;
+    }
+
+    .progress {
+      font-weight: bold;
+      color: #6366f1;
+      margin-bottom: 8px;
+    }
+
+    .question-box {
+      background: #f8fafc;
+      border: 2px solid #e5e7eb;
+      border-radius: 22px;
+      padding: 28px;
+      margin-bottom: 22px;
+    }
+
+    .question {
+      font-size: clamp(1.25rem, 3vw, 1.8rem);
+      font-weight: 800;
+      margin-bottom: 18px;
+      color: #111827;
+    }
+
+    .options {
+      display: grid;
+      gap: 14px;
+    }
+
+    .option-btn {
+      width: 100%;
+      border: 2px solid #dbeafe;
+      background: #ffffff;
+      padding: 16px 18px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 1.08rem;
+      text-align: left;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background: #eff6ff;
+      border-color: #60a5fa;
+      transform: scale(1.01);
+    }
+
+    .option-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.88;
+    }
+
+    .option-btn.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+      color: #14532d;
+      font-weight: bold;
+    }
+
+    .option-btn.wrong {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #7f1d1d;
+      font-weight: bold;
+    }
+
+    .feedback {
+      border-radius: 18px;
+      padding: 18px 20px;
+      margin-top: 18px;
+      line-height: 1.55;
+      font-size: 1rem;
+    }
+
+    .feedback.correct-note {
+      background: #ecfdf5;
+      border: 2px solid #bbf7d0;
+      color: #14532d;
+    }
+
+    .feedback.wrong-note {
+      background: #fff7ed;
+      border: 2px solid #fed7aa;
+      color: #7c2d12;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 13px 22px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: transform 0.12s ease, opacity 0.12s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-success {
+      background: #16a34a;
+      color: white;
+    }
+
+    .results {
+      text-align: center;
+      padding: 24px 8px;
+    }
+
+    .score-circle {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      margin: 22px auto;
+      background: linear-gradient(135deg, #dbeafe, #dcfce7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #1d4ed8;
+      border: 8px solid white;
+      box-shadow: 0 12px 30px rgba(37, 99, 235, 0.16);
+    }
+
+    canvas#confettiCanvas {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 20;
+    }
+
+    .formula {
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      background: #eef2ff;
+      color: #312e81;
+      padding: 2px 7px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 700px) {
+      .app {
+        padding: 22px;
+      }
+
+      .landing-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .quiz-header {
+        flex-direction: column-reverse;
+      }
+
+      .timer {
+        align-self: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confettiCanvas"></canvas>
+
+  <main class="app">
+    <section id="landingPage">
+      <h1>Quadratic Expressions Challenge</h1>
+      <p class="subtitle">Choose your game mode. Answer 5 questions as quickly and accurately as you can!</p>
+
+      <div class="landing-buttons">
+        <button class="mode-card" onclick="startQuiz('expansion')">
+          <span class="emoji">🚀</span>
+          <h2>Expansion</h2>
+          <p>Practise expanding brackets such as <span class="formula">(x + 3)(x + 5)</span> and <span class="formula">(2x - 1)(x + 4)</span>.</p>
+        </button>
+
+        <button class="mode-card" onclick="startQuiz('factorisation')">
+          <span class="emoji">🧩</span>
+          <h2>Factorisation</h2>
+          <p>Practise rewriting quadratics such as <span class="formula">x² + 7x + 12</span> into factorised form.</p>
+        </button>
+      </div>
+    </section>
+
+    <section id="quizPage" class="hidden">
+      <div class="quiz-header">
+        <div>
+          <p class="progress" id="progressText">Question 1 of 5</p>
+          <h2 id="quizTitle">Expansion Quiz</h2>
+        </div>
+        <div class="timer" id="timer">00:00</div>
+      </div>
+
+      <div class="question-box">
+        <div class="question" id="questionText"></div>
+        <div class="options" id="optionsContainer"></div>
+        <div id="feedbackBox" class="feedback hidden"></div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-secondary" onclick="goHome()">Back to Menu</button>
+        <button class="btn btn-primary hidden" id="nextBtn" onclick="nextQuestion()">Next Question</button>
+      </div>
+    </section>
+
+    <section id="resultsPage" class="hidden results">
+      <h2 id="resultsTitle">Quiz Complete!</h2>
+      <div class="score-circle" id="scoreCircle">5/5</div>
+      <p id="timeTaken"></p>
+      <p id="finalMessage"></p>
+      <div class="controls" style="justify-content:center;">
+        <button class="btn btn-success" onclick="restartSameQuiz()">Play Same Mode Again</button>
+        <button class="btn btn-secondary" onclick="goHome()">Choose Another Mode</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const quizzes = {
+      expansion: {
+        title: "Expansion Quiz",
+        questions: [
+          {
+            question: "Expand: (x + 3)(x + 5)",
+            options: ["x² + 8x + 15", "x² + 15x + 8", "x² + 2x + 15", "x² + 8x - 15"],
+            answer: "x² + 8x + 15",
+            explanation: "Use FOIL: x × x = x², x × 5 = 5x, 3 × x = 3x, and 3 × 5 = 15. Then combine 5x + 3x = 8x."
+          },
+          {
+            question: "Expand: (x - 4)(x + 6)",
+            options: ["x² + 2x - 24", "x² - 2x - 24", "x² + 10x - 24", "x² + 2x + 24"],
+            answer: "x² + 2x - 24",
+            explanation: "Multiply each term: x² + 6x - 4x - 24. Combine like terms to get x² + 2x - 24."
+          },
+          {
+            question: "Expand: (2x + 3)(x + 4)",
+            options: ["2x² + 11x + 12", "2x² + 8x + 12", "2x² + 7x + 12", "3x² + 11x + 12"],
+            answer: "2x² + 11x + 12",
+            explanation: "2x × x = 2x², 2x × 4 = 8x, 3 × x = 3x, and 3 × 4 = 12. Combine 8x + 3x = 11x."
+          },
+          {
+            question: "Expand: (3x - 2)(x - 5)",
+            options: ["3x² - 17x + 10", "3x² - 13x + 10", "3x² + 17x + 10", "3x² - 15x - 10"],
+            answer: "3x² - 17x + 10",
+            explanation: "3x × x = 3x², 3x × -5 = -15x, -2 × x = -2x, and -2 × -5 = 10. Combine -15x - 2x = -17x."
+          },
+          {
+            question: "Expand: (x - 7)²",
+            options: ["x² - 14x + 49", "x² - 49", "x² + 14x + 49", "x² - 7x + 49"],
+            answer: "x² - 14x + 49",
+            explanation: "(x - 7)² means (x - 7)(x - 7). The middle terms are -7x and -7x, which combine to -14x."
+          }
+        ]
+      },
+      factorisation: {
+        title: "Factorisation Quiz",
+        questions: [
+          {
+            question: "Factorise: x² + 8x + 15",
+            options: ["(x + 3)(x + 5)", "(x + 1)(x + 15)", "(x - 3)(x - 5)", "(x + 4)(x + 4)"],
+            answer: "(x + 3)(x + 5)",
+            explanation: "Find two numbers that multiply to 15 and add to 8. The numbers are 3 and 5, so the answer is (x + 3)(x + 5)."
+          },
+          {
+            question: "Factorise: x² - 2x - 24",
+            options: ["(x - 6)(x + 4)", "(x + 6)(x - 4)", "(x - 12)(x + 2)", "(x - 8)(x + 3)"],
+            answer: "(x - 6)(x + 4)",
+            explanation: "Find two numbers that multiply to -24 and add to -2. The numbers are -6 and +4."
+          },
+          {
+            question: "Factorise: x² + 10x + 25",
+            options: ["(x + 5)²", "(x - 5)²", "(x + 10)(x + 15)", "(x + 1)(x + 25)"],
+            answer: "(x + 5)²",
+            explanation: "This is a perfect square trinomial: x² + 10x + 25 = x² + 2(5)x + 5² = (x + 5)²."
+          },
+          {
+            question: "Factorise: 2x² + 7x + 3",
+            options: ["(2x + 1)(x + 3)", "(2x + 3)(x + 1)", "(x + 1)(x + 6)", "(2x - 1)(x - 3)"],
+            answer: "(2x + 1)(x + 3)",
+            explanation: "Check by expanding: (2x + 1)(x + 3) = 2x² + 6x + x + 3 = 2x² + 7x + 3."
+          },
+          {
+            question: "Factorise: 3x² - 17x + 10",
+            options: ["(3x - 2)(x - 5)", "(3x - 5)(x - 2)", "(3x + 2)(x + 5)", "(x - 10)(3x - 1)"],
+            answer: "(3x - 2)(x - 5)",
+            explanation: "Expanding (3x - 2)(x - 5) gives 3x² - 15x - 2x + 10 = 3x² - 17x + 10."
+          }
+        ]
+      }
+    };
+
+    function generateQuizQuestions(mode, count) {
+      const questions = [];
+      const usedQuestions = new Set();
+      let safetyCounter = 0;
+
+      while (questions.length < count && safetyCounter < 200) {
+        safetyCounter++;
+        const question = mode === "expansion" ? createExpansionQuestion() : createFactorisationQuestion();
+        if (!usedQuestions.has(question.question)) {
+          usedQuestions.add(question.question);
+          questions.push(question);
+        }
+      }
+
+      return questions;
+    }
+
+    function shuffle(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function randomNonZero(min, max) {
+      let value = 0;
+      while (value === 0) {
+        value = randomInt(min, max);
+      }
+      return value;
+    }
+
+    function signedNumber(value) {
+      return value >= 0 ? `+ ${value}` : `- ${Math.abs(value)}`;
+    }
+
+    function bracketTerm(value) {
+      return value >= 0 ? `(x + ${value})` : `(x - ${Math.abs(value)})`;
+    }
+
+    function formatLinearCoefficient(value) {
+      if (value === 0) return "";
+      if (value === 1) return "+ x";
+      if (value === -1) return "- x";
+      return value > 0 ? `+ ${value}x` : `- ${Math.abs(value)}x`;
+    }
+
+    function formatConstant(value) {
+      if (value === 0) return "";
+      return value > 0 ? `+ ${value}` : `- ${Math.abs(value)}`;
+    }
+
+    function formatQuadratic(a, b, c) {
+      const firstTerm = a === 1 ? "x²" : `${a}x²`;
+      return [firstTerm, formatLinearCoefficient(b), formatConstant(c)].filter(Boolean).join(" ");
+    }
+
+    function createExpansionQuestion() {
+      const style = Math.random();
+      let a = 1;
+      let b = randomNonZero(-9, 9);
+      let c = randomNonZero(-9, 9);
+      let d = 1;
+
+      if (style < 0.45) {
+        a = 1;
+        d = 1;
+      } else if (style < 0.85) {
+        a = randomInt(2, 5);
+        d = 1;
+      } else {
+        const n = randomNonZero(-9, 9);
+        b = n;
+        c = n;
+      }
+
+      const coefficientA = a * d;
+      const coefficientB = a * c + b * d;
+      const coefficientC = b * c;
+      const correctAnswer = formatQuadratic(coefficientA, coefficientB, coefficientC);
+
+      const leftBracket = a === 1 ? bracketTerm(b) : `(${a}x ${signedNumber(b)})`;
+      const rightBracket = d === 1 ? bracketTerm(c) : `(${d}x ${signedNumber(c)})`;
+
+      const wrongAnswers = shuffle([
+        formatQuadratic(coefficientA, a * c - b * d, coefficientC),
+        formatQuadratic(coefficientA, coefficientB, -coefficientC),
+        formatQuadratic(coefficientA, coefficientB + randomNonZero(-4, 4), coefficientC),
+        formatQuadratic(Math.max(1, coefficientA + randomNonZero(-2, 2)), coefficientB, coefficientC),
+        formatQuadratic(coefficientA, coefficientB - randomNonZero(-4, 4), coefficientC)
+      ]).filter(answer => answer !== correctAnswer);
+
+      return {
+        question: `Expand: ${leftBracket}${rightBracket}`,
+        options: shuffle([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+        answer: correctAnswer,
+        explanation: `Multiply every term in the first bracket by every term in the second bracket. Then combine the x terms to get ${correctAnswer}.`
+      };
+    }
+
+    function createFactorisationQuestion() {
+      const useLeadingCoefficient = Math.random() > 0.55;
+      const a = useLeadingCoefficient ? randomInt(2, 5) : 1;
+      const b = randomNonZero(-9, 9);
+      const c = randomNonZero(-9, 9);
+      const coefficientA = a;
+      const coefficientB = a * c + b;
+      const coefficientC = b * c;
+
+      const firstBracket = a === 1 ? bracketTerm(b) : `(${a}x ${signedNumber(b)})`;
+      const secondBracket = bracketTerm(c);
+      const correctAnswer = `${firstBracket}${secondBracket}`;
+      const expandedQuestion = formatQuadratic(coefficientA, coefficientB, coefficientC);
+
+      const wrongAnswers = shuffle([
+        `${bracketTerm(b)}${bracketTerm(c)}`,
+        `${a === 1 ? bracketTerm(-b) : `(${a}x ${signedNumber(-b)})`}${bracketTerm(c)}`,
+        `${a === 1 ? bracketTerm(b) : `(${a}x ${signedNumber(b)})`}${bracketTerm(-c)}`,
+        `${a === 1 ? bracketTerm(c) : `(${a}x ${signedNumber(c)})`}${bracketTerm(b)}`,
+        `${firstBracket}${bracketTerm(c + randomNonZero(-3, 3))}`
+      ]).filter(answer => answer !== correctAnswer);
+
+      return {
+        question: `Factorise: ${expandedQuestion}`,
+        options: shuffle([correctAnswer, ...wrongAnswers.slice(0, 3)]),
+        answer: correctAnswer,
+        explanation: `Look for two brackets that expand back to ${expandedQuestion}. Expanding ${correctAnswer} gives the original expression, so that is the factorised form.`
+      };
+    }
+
+    let currentMode = null;
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let startTime = null;
+    let elapsedBeforePause = 0;
+    let timerInterval = null;
+    let answered = false;
+
+    const landingPage = document.getElementById("landingPage");
+    const quizPage = document.getElementById("quizPage");
+    const resultsPage = document.getElementById("resultsPage");
+    const quizTitle = document.getElementById("quizTitle");
+    const progressText = document.getElementById("progressText");
+    const questionText = document.getElementById("questionText");
+    const optionsContainer = document.getElementById("optionsContainer");
+    const feedbackBox = document.getElementById("feedbackBox");
+    const nextBtn = document.getElementById("nextBtn");
+    const timerDisplay = document.getElementById("timer");
+
+    function startQuiz(mode) {
+      currentMode = mode;
+      currentQuestions = generateQuizQuestions(mode, 5);
+      currentQuestionIndex = 0;
+      score = 0;
+      answered = false;
+      startTime = Date.now();
+
+      landingPage.classList.add("hidden");
+      resultsPage.classList.add("hidden");
+      quizPage.classList.remove("hidden");
+
+      quizTitle.textContent = quizzes[mode].title;
+      startTimer();
+      showQuestion();
+    }
+
+    function showQuestion() {
+      answered = false;
+      feedbackBox.classList.add("hidden");
+      feedbackBox.textContent = "";
+      nextBtn.classList.add("hidden");
+
+      const questions = currentQuestions;
+      const item = questions[currentQuestionIndex];
+
+      progressText.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+      questionText.textContent = item.question;
+      optionsContainer.innerHTML = "";
+
+      item.options.forEach(option => {
+        const button = document.createElement("button");
+        button.className = "option-btn";
+        button.textContent = option;
+        button.onclick = () => checkAnswer(button, option);
+        optionsContainer.appendChild(button);
+      });
+    }
+
+    function checkAnswer(selectedButton, selectedOption) {
+      if (answered) return;
+      answered = true;
+      stopTimer();
+
+      const item = currentQuestions[currentQuestionIndex];
+      const allButtons = Array.from(document.querySelectorAll(".option-btn"));
+
+      allButtons.forEach(button => {
+        button.disabled = true;
+        if (button.textContent === item.answer) {
+          button.classList.add("correct");
+        }
+      });
+
+      if (selectedOption === item.answer) {
+        score++;
+        selectedButton.classList.add("correct");
+        feedbackBox.className = "feedback correct-note";
+        feedbackBox.innerHTML = `🎉 Correct! Excellent work.<br><br><strong>Explanation:</strong> ${item.explanation}`;
+        playBlingSound();
+        launchConfetti();
+      } else {
+        selectedButton.classList.add("wrong");
+        feedbackBox.className = "feedback wrong-note";
+        feedbackBox.innerHTML = `🌟 Good try! Mistakes help your brain grow.<br><br><strong>Correct answer:</strong> ${item.answer}<br><br><strong>Explanation:</strong> ${item.explanation}<br><br>Keep going — you are getting better with every question!`;
+      }
+
+      feedbackBox.classList.remove("hidden");
+      nextBtn.textContent = currentQuestionIndex === currentQuestions.length - 1 ? "See Results" : "Next Question";
+      nextBtn.classList.remove("hidden");
+    }
+
+    function nextQuestion() {
+      currentQuestionIndex++;
+      if (currentQuestionIndex >= currentQuestions.length) {
+        showResults();
+      } else {
+        resumeTimer();
+        showQuestion();
+      }
+    }
+
+    function showResults() {
+      stopTimer();
+      quizPage.classList.add("hidden");
+      resultsPage.classList.remove("hidden");
+
+      const elapsedSeconds = Math.floor(elapsedBeforePause / 1000);
+      const minutes = String(Math.floor(elapsedSeconds / 60)).padStart(2, "0");
+      const seconds = String(elapsedSeconds % 60).padStart(2, "0");
+
+      document.getElementById("resultsTitle").textContent = `${quizzes[currentMode].title} Complete!`;
+      document.getElementById("scoreCircle").textContent = `${score}/${currentQuestions.length}`;
+      document.getElementById("timeTaken").textContent = `Your time: ${minutes}:${seconds}`;
+
+      let message = "";
+      if (score === currentQuestions.length) {
+        message = "Outstanding! You have mastered this round. 🏆";
+        launchConfetti(180);
+        playBlingSound();
+      } else if (score >= 3) {
+        message = "Great effort! Review the explanations and try again for full marks. 💪";
+      } else {
+        message = "Keep practising! Focus on multiplying terms carefully and checking signs. You can do this. 🌱";
+      }
+      document.getElementById("finalMessage").textContent = message;
+    }
+
+    function restartSameQuiz() {
+      startQuiz(currentMode);
+    }
+
+    function goHome() {
+      stopTimer();
+      currentMode = null;
+      landingPage.classList.remove("hidden");
+      quizPage.classList.add("hidden");
+      resultsPage.classList.add("hidden");
+      timerDisplay.textContent = "00:00";
+    }
+
+    function startTimer() {
+      stopTimer();
+      startTime = Date.now();
+      elapsedBeforePause = 0;
+      runTimer();
+    }
+
+    function resumeTimer() {
+      stopTimer();
+      startTime = Date.now() - elapsedBeforePause;
+      runTimer();
+    }
+
+    function runTimer() {
+      timerInterval = setInterval(() => {
+        elapsedBeforePause = Date.now() - startTime;
+        updateTimerDisplay(elapsedBeforePause);
+      }, 300);
+    }
+
+    function updateTimerDisplay(elapsedMilliseconds) {
+      const elapsedSeconds = Math.floor(elapsedMilliseconds / 1000);
+      const minutes = String(Math.floor(elapsedSeconds / 60)).padStart(2, "0");
+      const seconds = String(elapsedSeconds % 60).padStart(2, "0");
+      timerDisplay.textContent = `${minutes}:${seconds}`;
+    }
+
+    function stopTimer() {
+      if (timerInterval) {
+        elapsedBeforePause = Date.now() - startTime;
+        updateTimerDisplay(elapsedBeforePause);
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    function playBlingSound() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        const notes = [880, 1174.66, 1567.98];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+
+          oscillator.type = "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime + index * 0.08);
+
+          gain.gain.setValueAtTime(0, audioCtx.currentTime + index * 0.08);
+          gain.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime + index * 0.08 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + index * 0.08 + 0.18);
+
+          oscillator.connect(gain);
+          gain.connect(audioCtx.destination);
+          oscillator.start(audioCtx.currentTime + index * 0.08);
+          oscillator.stop(audioCtx.currentTime + index * 0.08 + 0.2);
+        });
+      } catch (error) {
+        console.log("Audio is unavailable in this browser.");
+      }
+    }
+
+    const confettiCanvas = document.getElementById("confettiCanvas");
+    const ctx = confettiCanvas.getContext("2d");
+    let confettiPieces = [];
+    let confettiAnimationId = null;
+
+    function resizeCanvas() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function launchConfetti(amount = 90) {
+      const colors = ["#f97316", "#22c55e", "#3b82f6", "#eab308", "#ec4899", "#8b5cf6"];
+
+      for (let i = 0; i < amount; i++) {
+        confettiPieces.push({
+          x: Math.random() * confettiCanvas.width,
+          y: -20 - Math.random() * 80,
+          size: 7 + Math.random() * 8,
+          speedY: 2 + Math.random() * 5,
+          speedX: -2 + Math.random() * 4,
+          rotation: Math.random() * 360,
+          rotationSpeed: -8 + Math.random() * 16,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          life: 140
+        });
+      }
+
+      if (!confettiAnimationId) animateConfetti();
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+      confettiPieces.forEach(piece => {
+        piece.x += piece.speedX;
+        piece.y += piece.speedY;
+        piece.rotation += piece.rotationSpeed;
+        piece.life--;
+
+        ctx.save();
+        ctx.translate(piece.x, piece.y);
+        ctx.rotate(piece.rotation * Math.PI / 180);
+        ctx.fillStyle = piece.color;
+        ctx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size * 0.65);
+        ctx.restore();
+      });
+
+      confettiPieces = confettiPieces.filter(piece => piece.life > 0 && piece.y < confettiCanvas.height + 30);
+
+      if (confettiPieces.length > 0) {
+        confettiAnimationId = requestAnimationFrame(animateConfetti);
+      } else {
+        cancelAnimationFrame(confettiAnimationId);
+        confettiAnimationId = null;
+        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      }
+    }
+  </script>
+</body>
+</html>
