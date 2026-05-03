@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zero Product Rule Quiz Game</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #f59e0b;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --bg: #eef6ff;
+      --card: #ffffff;
+      --soft: #dbeafe;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: radial-gradient(circle at top left, #ffffff 0, var(--bg) 38%, #dbeafe 100%);
+      min-height: 100vh;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: min(980px, 100%);
+      background: rgba(255,255,255,0.94);
+      border-radius: 28px;
+      box-shadow: 0 24px 80px rgba(37, 99, 235, 0.18);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(37, 99, 235, 0.12);
+    }
+
+    header {
+      padding: 28px 34px;
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+      color: white;
+      position: relative;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.75rem, 4vw, 2.7rem);
+      letter-spacing: -0.04em;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 1.05rem;
+      opacity: 0.92;
+      max-width: 720px;
+      line-height: 1.45;
+    }
+
+    .timer {
+      position: absolute;
+      top: 22px;
+      right: 28px;
+      background: white;
+      color: #15803d;
+      font-weight: 800;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 1.1rem;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+      display: none;
+    }
+
+    main {
+      padding: 34px;
+    }
+
+    .landing {
+      text-align: center;
+      padding: 18px 0 10px;
+    }
+
+    .landing h2, .quiz h2, .result h2 {
+      font-size: clamp(1.55rem, 3vw, 2.15rem);
+      margin: 0 0 12px;
+    }
+
+    .landing p {
+      margin: 0 auto 26px;
+      color: var(--muted);
+      max-width: 700px;
+      line-height: 1.55;
+    }
+
+    .level-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .level-card {
+      border: 2px solid var(--soft);
+      border-radius: 22px;
+      padding: 24px;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      text-align: left;
+      min-height: 210px;
+    }
+
+    .level-card:hover, .level-card:focus {
+      transform: translateY(-5px);
+      border-color: var(--primary);
+      box-shadow: 0 14px 28px rgba(37,99,235,0.18);
+      outline: none;
+    }
+
+    .level-card .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--primary-dark);
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .level-card h3 {
+      font-size: 1.35rem;
+      margin: 0 0 10px;
+    }
+
+    .level-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.98rem;
+    }
+
+    .quiz, .result { display: none; }
+
+    .quiz-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border-radius: 999px;
+      padding: 8px 13px;
+      font-weight: 800;
+    }
+
+    .progress-wrap {
+      height: 12px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 14px 0 28px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--primary), #7c3aed);
+      border-radius: 999px;
+      transition: width .25s ease;
+    }
+
+    .question-card {
+      background: #f8fbff;
+      border: 2px solid #e0edff;
+      border-radius: 24px;
+      padding: 26px;
+      margin-bottom: 22px;
+    }
+
+    .question-card .prompt {
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .expression {
+      font-size: clamp(1.55rem, 4vw, 2.45rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.2;
+      overflow-x: auto;
+    }
+
+    .answers {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .answer-btn {
+      border: 2px solid #dbeafe;
+      background: white;
+      color: var(--ink);
+      border-radius: 18px;
+      padding: 18px 16px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 1.12rem;
+      font-weight: 800;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+      min-height: 72px;
+    }
+
+    .answer-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .answer-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.72;
+    }
+
+    .answer-btn.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+      color: #166534;
+    }
+
+    .answer-btn.wrong {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      padding: 18px;
+    }
+
+    .modal {
+      width: min(620px, 100%);
+      background: white;
+      border-radius: 26px;
+      padding: 28px;
+      box-shadow: 0 30px 90px rgba(0,0,0,0.28);
+      animation: pop .18s ease-out;
+    }
+
+    @keyframes pop {
+      from { transform: scale(.94); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal h3 {
+      margin: 0 0 10px;
+      font-size: 1.6rem;
+    }
+
+    .modal p {
+      margin: 10px 0;
+      line-height: 1.55;
+      color: #374151;
+    }
+
+    .explanation {
+      background: #f8fafc;
+      border-left: 5px solid var(--primary);
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-top: 14px;
+    }
+
+    .primary-btn, .secondary-btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 20px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 18px;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+      color: white;
+      box-shadow: 0 12px 28px rgba(37,99,235,0.24);
+    }
+
+    .secondary-btn {
+      background: #e5e7eb;
+      color: #111827;
+      margin-left: 8px;
+    }
+
+    .primary-btn:hover, .secondary-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .result {
+      text-align: center;
+      padding: 26px 0 10px;
+    }
+
+    .score-big {
+      font-size: clamp(3rem, 9vw, 6rem);
+      font-weight: 1000;
+      letter-spacing: -0.08em;
+      color: var(--primary-dark);
+      margin: 12px 0;
+    }
+
+    .result p {
+      color: var(--muted);
+      line-height: 1.55;
+      max-width: 680px;
+      margin: 0 auto 14px;
+    }
+
+    .confetti-piece {
+      position: fixed;
+      top: -12px;
+      width: 10px;
+      height: 16px;
+      opacity: .95;
+      pointer-events: none;
+      z-index: 50;
+      animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(105vh) rotate(720deg);
+        opacity: 0.85;
+      }
+    }
+
+    .math-note {
+      margin-top: 20px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      padding: 14px 16px;
+      border-radius: 16px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 760px) {
+      header { padding: 72px 22px 24px; }
+      .timer { left: 22px; right: auto; top: 20px; }
+      main { padding: 24px 18px; }
+      .level-grid, .answers { grid-template-columns: 1fr; }
+      .quiz-top { align-items: flex-start; flex-direction: column; }
+      .secondary-btn { margin-left: 0; display: block; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="timer" id="timer">00:00</div>
+      <h1>Zero Product Rule Challenge</h1>
+      <p>Use the rule: if a product is zero, at least one factor must be zero. Solve each equation for <strong>x</strong>!</p>
+    </header>
+
+    <main>
+      <section class="landing" id="landing">
+        <h2>Choose your level</h2>
+        <p>Each game has 5 fresh questions. The questions are randomly created every attempt, so students will not see the same quiz again and again.</p>
+        <div class="level-grid">
+          <div class="level-card" tabindex="0" role="button" onclick="startQuiz('easy')" onkeydown="handleLevelKey(event, 'easy')">
+            <span class="badge">Easy</span>
+            <h3>Simple factors</h3>
+            <p>All coefficients of x are 1, for example:<br><strong>(x − 1)(x + 2) = 0</strong></p>
+          </div>
+          <div class="level-card" tabindex="0" role="button" onclick="startQuiz('medium')" onkeydown="handleLevelKey(event, 'medium')">
+            <span class="badge">Medium</span>
+            <h3>Mixed coefficients</h3>
+            <p>Some coefficients of x are not 1, for example:<br><strong>(2x − 1)(−3x + 1) = 0</strong></p>
+          </div>
+          <div class="level-card" tabindex="0" role="button" onclick="startQuiz('hard')" onkeydown="handleLevelKey(event, 'hard')">
+            <span class="badge">Hard</span>
+            <h3>Expanded quadratics</h3>
+            <p>The equation is shown in expanded form, but it is factorisable using the Zero Product Rule.</p>
+          </div>
+        </div>
+        <div class="math-note">
+          Teacher tip: The timer pauses whenever feedback is shown, so students are not penalised for reading the explanation.
+        </div>
+      </section>
+
+      <section class="quiz" id="quiz">
+        <div class="quiz-top">
+          <h2 id="quizTitle">Quiz</h2>
+          <div class="pill" id="questionCount">Question 1 of 5</div>
+        </div>
+        <div class="progress-wrap" aria-label="Quiz progress">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="question-card">
+          <div class="prompt">Solve for x:</div>
+          <div class="expression" id="questionText"></div>
+        </div>
+        <div class="answers" id="answers"></div>
+      </section>
+
+      <section class="result" id="result">
+        <h2>Game complete!</h2>
+        <div class="score-big" id="finalScore">0/5</div>
+        <p id="resultMessage"></p>
+        <p id="finalTime"></p>
+        <button class="primary-btn" onclick="restartSameLevel()">Play Same Level Again</button>
+        <button class="secondary-btn" onclick="goHome()">Choose Another Level</button>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="feedbackModal" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+    <div class="modal">
+      <h3 id="feedbackTitle"></h3>
+      <p id="feedbackMessage"></p>
+      <div class="explanation" id="feedbackExplanation"></div>
+      <button class="primary-btn" id="nextBtn" onclick="nextQuestion()">Next Question</button>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL_QUESTIONS = 5;
+    const state = {
+      level: null,
+      questions: [],
+      current: 0,
+      score: 0,
+      seconds: 0,
+      timerId: null,
+      timerRunning: false,
+      audioContext: null
+    };
+
+    const landing = document.getElementById('landing');
+    const quiz = document.getElementById('quiz');
+    const result = document.getElementById('result');
+    const timer = document.getElementById('timer');
+    const quizTitle = document.getElementById('quizTitle');
+    const questionCount = document.getElementById('questionCount');
+    const progressBar = document.getElementById('progressBar');
+    const questionText = document.getElementById('questionText');
+    const answers = document.getElementById('answers');
+    const feedbackModal = document.getElementById('feedbackModal');
+    const feedbackTitle = document.getElementById('feedbackTitle');
+    const feedbackMessage = document.getElementById('feedbackMessage');
+    const feedbackExplanation = document.getElementById('feedbackExplanation');
+    const nextBtn = document.getElementById('nextBtn');
+    const finalScore = document.getElementById('finalScore');
+    const resultMessage = document.getElementById('resultMessage');
+    const finalTime = document.getElementById('finalTime');
+
+    function handleLevelKey(event, level) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        startQuiz(level);
+      }
+    }
+
+    function startQuiz(level) {
+      state.level = level;
+      state.questions = generateQuiz(level);
+      state.current = 0;
+      state.score = 0;
+      state.seconds = 0;
+
+      landing.style.display = 'none';
+      result.style.display = 'none';
+      quiz.style.display = 'block';
+      timer.style.display = 'block';
+
+      quizTitle.textContent = `${capitalise(level)} Level`;
+      updateTimerDisplay();
+      startTimer();
+      renderQuestion();
+    }
+
+    function generateQuiz(level) {
+      const used = new Set();
+      const questions = [];
+      while (questions.length < TOTAL_QUESTIONS) {
+        const q = makeQuestion(level);
+        if (!used.has(q.signature)) {
+          used.add(q.signature);
+          questions.push(q);
+        }
+      }
+      return questions;
+    }
+
+    function makeQuestion(level) {
+      if (level === 'easy') return makeEasyQuestion();
+      if (level === 'medium') return makeMediumQuestion();
+      return makeHardQuestion();
+    }
+
+    function makeEasyQuestion() {
+      let r1 = randomNonZeroInt(-9, 9);
+      let r2 = randomNonZeroInt(-9, 9);
+      while (r2 === r1) r2 = randomNonZeroInt(-9, 9);
+
+      const factor1 = easyFactorFromRoot(r1);
+      const factor2 = easyFactorFromRoot(r2);
+      const question = `${factor1}${factor2} = 0`;
+      const correct = formatSolutionSet([r1, r2]);
+      const explanation = `Set each factor equal to zero: ${factor1} = 0 gives x = ${formatNumber(r1)}, and ${factor2} = 0 gives x = ${formatNumber(r2)}. Therefore, ${correct}.`;
+
+      return buildQuestion(question, [r1, r2], explanation, `easy-${r1}-${r2}`);
+    }
+
+    function makeMediumQuestion() {
+      const f1 = randomLinearFactor();
+      let f2 = randomLinearFactor();
+      while (sameRoot(f1, f2)) f2 = randomLinearFactor();
+
+      const roots = [fraction(-f1.b, f1.a), fraction(-f2.b, f2.a)];
+      const question = `${formatLinearFactor(f1)}${formatLinearFactor(f2)} = 0`;
+      const correct = formatSolutionSet(roots);
+      const explanation = `Use the Zero Product Rule. ${formatLinearFactor(f1)} = 0 gives x = ${formatFraction(roots[0])}. ${formatLinearFactor(f2)} = 0 gives x = ${formatFraction(roots[1])}. Hence, ${correct}.`;
+
+      return buildQuestion(question, roots, explanation, `medium-${f1.a}-${f1.b}-${f2.a}-${f2.b}`);
+    }
+
+    function makeHardQuestion() {
+      const f1 = randomLinearFactorForHard();
+      let f2 = randomLinearFactorForHard();
+      while (sameRoot(f1, f2)) f2 = randomLinearFactorForHard();
+
+      const A = f1.a * f2.a;
+      const B = f1.a * f2.b + f1.b * f2.a;
+      const C = f1.b * f2.b;
+      const roots = [fraction(-f1.b, f1.a), fraction(-f2.b, f2.a)];
+      const question = `${formatQuadratic(A, B, C)} = 0`;
+      const factorised = `${formatLinearFactor(f1)}${formatLinearFactor(f2)} = 0`;
+      const correct = formatSolutionSet(roots);
+      const explanation = `First factorise the quadratic: ${formatQuadratic(A, B, C)} = ${factorised.replace(' = 0', '')}. Then set each factor to zero. This gives ${correct}.`;
+
+      return buildQuestion(question, roots, explanation, `hard-${A}-${B}-${C}-${f1.a}-${f1.b}-${f2.a}-${f2.b}`);
+    }
+
+    function buildQuestion(question, roots, explanation, signature) {
+      const correct = formatSolutionSet(roots);
+      const options = makeOptions(roots, correct);
+      return { question, roots, correct, options, explanation, signature };
+    }
+
+    function makeOptions(roots, correct) {
+      const options = new Set([correct]);
+      let attempts = 0;
+
+      while (options.size < 4 && attempts < 200) {
+        attempts++;
+        const type = randomInt(1, 5);
+        let wrongRoots;
+
+        if (type === 1) {
+          wrongRoots = roots.map(negateValue);
+        } else if (type === 2) {
+          wrongRoots = [roots[0]];
+        } else if (type === 3) {
+          wrongRoots = [roots[1]];
+        } else if (type === 4) {
+          wrongRoots = roots.map(addOneValue);
+        } else {
+          wrongRoots = roots.map(subtractOneValue);
+        }
+
+        const wrong = formatSolutionSet(wrongRoots);
+        if (wrong !== correct) options.add(wrong);
+      }
+
+      while (options.size < 4) {
+        const fake1 = randomNonZeroInt(-8, 8);
+        let fake2 = randomNonZeroInt(-8, 8);
+        while (fake2 === fake1) fake2 = randomNonZeroInt(-8, 8);
+        const fake = formatSolutionSet([fake1, fake2]);
+        if (fake !== correct) options.add(fake);
+      }
+
+      return shuffle([...options]);
+    }
+
+    function renderQuestion() {
+      const q = state.questions[state.current];
+      questionCount.textContent = `Question ${state.current + 1} of ${TOTAL_QUESTIONS}`;
+      progressBar.style.width = `${(state.current / TOTAL_QUESTIONS) * 100}%`;
+      questionText.textContent = q.question;
+      answers.innerHTML = '';
+
+      q.options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'answer-btn';
+        btn.textContent = option;
+        btn.onclick = () => checkAnswer(option, btn);
+        answers.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, selectedBtn) {
+      pauseTimer();
+      const q = state.questions[state.current];
+      const isCorrect = selected === q.correct;
+      const buttons = [...document.querySelectorAll('.answer-btn')];
+
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent === q.correct) btn.classList.add('correct');
+      });
+
+      if (isCorrect) {
+        state.score++;
+        selectedBtn.classList.add('correct');
+        playBling();
+        launchConfetti();
+        feedbackTitle.textContent = 'Correct! ✨';
+        feedbackMessage.textContent = randomChoice([
+          'Brilliant work! You used the Zero Product Rule correctly.',
+          'Excellent! You found both possible values of x.',
+          'Nice job! Keep that confidence going.'
+        ]);
+      } else {
+        selectedBtn.classList.add('wrong');
+        feedbackTitle.textContent = 'Good try! 🌱';
+        feedbackMessage.textContent = randomChoice([
+          'Mistakes help your brain grow. Read the explanation and try the next one!',
+          'You are close. Remember to set each factor equal to zero.',
+          'Keep going! Check each factor separately.'
+        ]);
+      }
+
+      feedbackExplanation.innerHTML = `<strong>Correct answer:</strong> ${q.correct}<br><br>${q.explanation}`;
+      nextBtn.textContent = state.current === TOTAL_QUESTIONS - 1 ? 'See Results' : 'Next Question';
+      feedbackModal.style.display = 'flex';
+    }
+
+    function nextQuestion() {
+      feedbackModal.style.display = 'none';
+      state.current++;
+
+      if (state.current >= TOTAL_QUESTIONS) {
+        finishQuiz();
+      } else {
+        renderQuestion();
+        startTimer();
+      }
+    }
+
+    function finishQuiz() {
+      pauseTimer();
+      quiz.style.display = 'none';
+      result.style.display = 'block';
+      progressBar.style.width = '100%';
+      finalScore.textContent = `${state.score}/${TOTAL_QUESTIONS}`;
+      finalTime.textContent = `Your active solving time was ${formatTime(state.seconds)}.`;
+
+      if (state.score === 5) {
+        resultMessage.textContent = 'Outstanding! You have mastered this round of the Zero Product Rule.';
+        launchConfetti(120);
+        playBling();
+      } else if (state.score >= 3) {
+        resultMessage.textContent = 'Great effort! You are getting stronger. Review the explanations and try again for full marks.';
+      } else {
+        resultMessage.textContent = 'Keep practising. Remember: make each factor equal to zero, then solve each simple equation.';
+      }
+    }
+
+    function restartSameLevel() {
+      startQuiz(state.level);
+    }
+
+    function goHome() {
+      pauseTimer();
+      state.level = null;
+      landing.style.display = 'block';
+      quiz.style.display = 'none';
+      result.style.display = 'none';
+      timer.style.display = 'none';
+    }
+
+    function startTimer() {
+      if (state.timerRunning) return;
+      state.timerRunning = true;
+      state.timerId = setInterval(() => {
+        state.seconds++;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      state.timerRunning = false;
+      clearInterval(state.timerId);
+      state.timerId = null;
+    }
+
+    function updateTimerDisplay() {
+      timer.textContent = formatTime(state.seconds);
+    }
+
+    function formatTime(totalSeconds) {
+      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+      const seconds = String(totalSeconds % 60).padStart(2, '0');
+      return `${minutes}:${seconds}`;
+    }
+
+    function randomLinearFactor() {
+      let a = randomChoice([-5, -4, -3, -2, 2, 3, 4, 5]);
+      if (Math.random() < 0.35) a = randomChoice([1, -1, 2, -2, 3, -3]);
+      const b = randomNonZeroInt(-9, 9);
+      return { a, b };
+    }
+
+    function randomLinearFactorForHard() {
+      const a = randomChoice([-4, -3, -2, -1, 1, 2, 3, 4]);
+      const b = randomNonZeroInt(-8, 8);
+      return { a, b };
+    }
+
+    function sameRoot(f1, f2) {
+      return simplifyFraction(-f1.b, f1.a).key === simplifyFraction(-f2.b, f2.a).key;
+    }
+
+    function easyFactorFromRoot(root) {
+      return root >= 0 ? `(x − ${root})` : `(x + ${Math.abs(root)})`;
+    }
+
+    function formatLinearFactor({ a, b }) {
+      let xPart;
+      if (a === 1) xPart = 'x';
+      else if (a === -1) xPart = '−x';
+      else xPart = `${a < 0 ? '−' : ''}${Math.abs(a)}x`;
+
+      if (b === 0) return `(${xPart})`;
+      const sign = b > 0 ? ' + ' : ' − ';
+      return `(${xPart}${sign}${Math.abs(b)})`;
+    }
+
+    function formatQuadratic(a, b, c) {
+      const parts = [];
+      parts.push(`${a === -1 ? '−' : a === 1 ? '' : a}x²`);
+      if (b !== 0) parts.push(`${b > 0 ? '+ ' : '− '}${Math.abs(b) === 1 ? '' : Math.abs(b)}x`);
+      if (c !== 0) parts.push(`${c > 0 ? '+ ' : '− '}${Math.abs(c)}`);
+      return parts.join(' ').replace(/^\+\s/, '');
+    }
+
+    function fraction(n, d) {
+      return simplifyFraction(n, d);
+    }
+
+    function simplifyFraction(n, d) {
+      if (d === 0) throw new Error('Denominator cannot be zero');
+      if (d < 0) { n = -n; d = -d; }
+      const g = gcd(Math.abs(n), Math.abs(d));
+      const num = n / g;
+      const den = d / g;
+      return { num, den, key: `${num}/${den}` };
+    }
+
+    function gcd(a, b) {
+      while (b !== 0) [a, b] = [b, a % b];
+      return a || 1;
+    }
+
+    function formatSolutionSet(values) {
+      const unique = [];
+      const seen = new Set();
+      values.forEach(v => {
+        const f = typeof v === 'number' ? fraction(v, 1) : v;
+        if (!seen.has(f.key)) {
+          seen.add(f.key);
+          unique.push(f);
+        }
+      });
+      unique.sort((a, b) => (a.num / a.den) - (b.num / b.den));
+      return `x = ${unique.map(formatFraction).join(' or x = ')}`;
+    }
+
+    function formatFraction(f) {
+      if (typeof f === 'number') return String(f);
+      if (f.den === 1) return String(f.num);
+      const sign = f.num < 0 ? '−' : '';
+      return `${sign}${Math.abs(f.num)}/${f.den}`;
+    }
+
+    function formatNumber(n) {
+      return n < 0 ? `−${Math.abs(n)}` : `${n}`;
+    }
+
+    function negateValue(v) {
+      const f = typeof v === 'number' ? fraction(v, 1) : v;
+      return fraction(-f.num, f.den);
+    }
+
+    function addOneValue(v) {
+      const f = typeof v === 'number' ? fraction(v, 1) : v;
+      return fraction(f.num + f.den, f.den);
+    }
+
+    function subtractOneValue(v) {
+      const f = typeof v === 'number' ? fraction(v, 1) : v;
+      return fraction(f.num - f.den, f.den);
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function randomNonZeroInt(min, max) {
+      let n = 0;
+      while (n === 0) n = randomInt(min, max);
+      return n;
+    }
+
+    function randomChoice(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function capitalise(word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    }
+
+    function launchConfetti(amount = 80) {
+      const colors = ['#2563eb', '#16a34a', '#f59e0b', '#ec4899', '#7c3aed', '#ef4444'];
+      for (let i = 0; i < amount; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.background = randomChoice(colors);
+        piece.style.animationDuration = `${randomInt(1800, 3600)}ms`;
+        piece.style.animationDelay = `${randomInt(0, 250)}ms`;
+        piece.style.transform = `rotate(${randomInt(0, 360)}deg)`;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 4100);
+      }
+    }
+
+    function playBling() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!state.audioContext) state.audioContext = new AudioContext();
+        const ctx = state.audioContext;
+        const now = ctx.currentTime;
+
+        const notes = [880, 1174.66, 1567.98];
+        notes.forEach((freq, index) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + index * 0.08);
+          gain.gain.setValueAtTime(0.0001, now + index * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.18, now + index * 0.08 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.08 + 0.18);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + index * 0.08);
+          osc.stop(now + index * 0.08 + 0.2);
+        });
+      } catch (error) {
+        console.log('Audio unavailable:', error);
+      }
+    }
+  </script>
+</body>
+</html>
