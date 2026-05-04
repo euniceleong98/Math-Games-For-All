@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Logarithms Quiz Arcade</title>
+  <style>
+    :root {
+      --bg1: #f6f8ff;
+      --bg2: #eef9f1;
+      --ink: #1c2331;
+      --muted: #667085;
+      --card: #ffffff;
+      --accent: #3b5bdb;
+      --accent2: #12b76a;
+      --danger: #d92d20;
+      --warning: #f79009;
+      --shadow: 0 20px 60px rgba(28, 35, 49, 0.12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 20%, rgba(59,91,219,.16), transparent 30%),
+        radial-gradient(circle at 90% 10%, rgba(18,183,106,.18), transparent 28%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: min(1060px, 94vw);
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), #845ef7);
+      color: white;
+      font-size: 24px;
+      box-shadow: var(--shadow);
+      user-select: none;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 4px;
+      font-size: 1rem;
+    }
+
+    .timer {
+      color: #039855;
+      font-weight: 800;
+      font-size: clamp(1.2rem, 2.4vw, 1.7rem);
+      background: rgba(18,183,106,.1);
+      border: 2px solid rgba(18,183,106,.22);
+      padding: 12px 16px;
+      border-radius: 16px;
+      min-width: 118px;
+      text-align: center;
+      display: none;
+    }
+
+    .card {
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.6);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: clamp(20px, 4vw, 40px);
+    }
+
+    .landing {
+      text-align: center;
+    }
+
+    .landing h2 {
+      margin: 0;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      letter-spacing: -0.03em;
+    }
+
+    .landing p {
+      color: var(--muted);
+      max-width: 720px;
+      margin: 12px auto 28px;
+      line-height: 1.6;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .game-btn {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      border-radius: 22px;
+      padding: 24px;
+      min-height: 180px;
+      background: white;
+      box-shadow: 0 12px 32px rgba(28,35,49,.1);
+      text-align: left;
+      transition: transform .18s ease, box-shadow .18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-btn:hover,
+    .game-btn:focus-visible {
+      transform: translateY(-5px);
+      box-shadow: 0 18px 42px rgba(28,35,49,.16);
+      outline: 3px solid rgba(59,91,219,.18);
+    }
+
+    .game-btn::after {
+      content: "";
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border-radius: 999px;
+      right: -34px;
+      bottom: -34px;
+      background: rgba(59,91,219,.12);
+    }
+
+    .game-btn:nth-child(2)::after { background: rgba(18,183,106,.14); }
+    .game-btn:nth-child(3)::after { background: rgba(247,144,9,.16); }
+
+    .game-icon {
+      font-size: 34px;
+      margin-bottom: 14px;
+    }
+
+    .game-title {
+      font-size: 1.22rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .game-desc {
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: .95rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .quiz { display: none; }
+
+    .quiz-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .crumb {
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: .82rem;
+    }
+
+    .quiz h2 {
+      margin: 6px 0 0;
+      font-size: clamp(1.5rem, 3vw, 2.15rem);
+      letter-spacing: -0.03em;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: rgba(59,91,219,.1);
+      color: #25389b;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .progress-wrap {
+      height: 12px;
+      border-radius: 999px;
+      background: #e9ecf5;
+      overflow: hidden;
+      margin: 18px 0 26px;
+    }
+
+    .progress {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width .25s ease;
+    }
+
+    .question {
+      font-size: clamp(1.25rem, 3vw, 2rem);
+      font-weight: 800;
+      line-height: 1.35;
+      margin: 16px 0 20px;
+    }
+
+    .expression {
+      display: inline-block;
+      font-family: "Times New Roman", Cambria, serif;
+      font-size: 1.15em;
+      background: #f7f8fc;
+      border: 1px solid #e4e7ec;
+      border-radius: 16px;
+      padding: 8px 12px;
+      margin-top: 8px;
+    }
+
+    .options {
+      display: grid;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .option {
+      border: 2px solid #e4e7ec;
+      background: white;
+      padding: 18px;
+      border-radius: 18px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 1.04rem;
+      line-height: 1.45;
+      transition: transform .14s ease, border-color .14s ease, background .14s ease;
+    }
+
+    .option:hover,
+    .option:focus-visible {
+      transform: translateY(-2px);
+      border-color: rgba(59,91,219,.6);
+      outline: none;
+      background: #f8faff;
+    }
+
+    .option.correct {
+      border-color: var(--accent2);
+      background: rgba(18,183,106,.08);
+    }
+
+    .option.wrong {
+      border-color: var(--danger);
+      background: rgba(217,45,32,.06);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      border-radius: 14px;
+      padding: 13px 18px;
+      font-size: 1rem;
+      font-weight: 800;
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 10px 22px rgba(59,91,219,.2);
+    }
+
+    .btn.secondary {
+      color: var(--ink);
+      background: #eef1f8;
+      box-shadow: none;
+    }
+
+    .btn.success {
+      background: var(--accent2);
+      box-shadow: 0 10px 22px rgba(18,183,106,.2);
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(12,18,33,.48);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 20;
+    }
+
+    .modal {
+      width: min(650px, 94vw);
+      background: white;
+      border-radius: 26px;
+      box-shadow: 0 30px 90px rgba(0,0,0,.25);
+      padding: 28px;
+      animation: pop .18s ease both;
+    }
+
+    @keyframes pop {
+      from { transform: scale(.94); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal h3 {
+      margin: 0 0 12px;
+      font-size: 1.6rem;
+    }
+
+    .modal p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 10px 0;
+    }
+
+    .answer-box {
+      background: #f7f8fc;
+      border-left: 5px solid var(--accent);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin: 16px 0;
+      line-height: 1.6;
+    }
+
+    .score-screen {
+      display: none;
+      text-align: center;
+    }
+
+    .score-big {
+      font-size: clamp(3.2rem, 9vw, 6rem);
+      margin: 20px 0 8px;
+      line-height: 1;
+    }
+
+    .law-reference {
+      margin-top: 22px;
+      text-align: left;
+      background: #f7f8fc;
+      border-radius: 18px;
+      padding: 18px;
+      border: 1px solid #e4e7ec;
+    }
+
+    .law-reference h3 {
+      margin: 0 0 10px;
+    }
+
+    .law-reference ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    canvas#confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 760px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .timer {
+        align-self: stretch;
+      }
+      .game-grid {
+        grid-template-columns: 1fr;
+      }
+      .quiz-top {
+        flex-direction: column;
+      }
+      .pill {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">log</div>
+        <div>
+          <h1>Logarithms Quiz Arcade</h1>
+          <div class="subtitle">Fast, fresh, randomised practice for you!</div>
+        </div>
+      </div>
+      <div id="timer" class="timer">00:00</div>
+    </header>
+
+    <main id="landing" class="card landing">
+      <h2>Choose your challenge</h2>
+      <p>
+        Each quiz has 5 randomly generated multiple-choice questions.
+      </p>
+
+      <div class="game-grid">
+        <button class="game-btn" data-game="laws">
+          <div class="game-icon">📚</div>
+          <div class="game-title">Laws of Logarithms</div>
+          <div class="game-desc">Identify Product, Quotient, Power and Change of Base laws, including tempting misconceptions.</div>
+        </button>
+
+        <button class="game-btn" data-game="mental">
+          <div class="game-icon">🧠</div>
+          <div class="game-title">Mental Math</div>
+          <div class="game-desc">Evaluate simple logarithmic expressions without a calculator.</div>
+        </button>
+
+        <button class="game-btn" data-game="calculator">
+          <div class="game-icon">🧮</div>
+          <div class="game-title">Calculator Skills</div>
+          <div class="game-desc">Evaluate logarithms and logarithmic expressions to 3 significant figures.</div>
+        </button>
+      </div>
+
+      <div class="law-reference">
+        <h3>Reference laws included</h3>
+        <ul>
+          <li><strong>Product Law:</strong> log<sub>a</sub>(xy) = log<sub>a</sub>x + log<sub>a</sub>y</li>
+          <li><strong>Quotient Law:</strong> log<sub>a</sub>(x/y) = log<sub>a</sub>x − log<sub>a</sub>y</li>
+          <li><strong>Power Law:</strong> log<sub>a</sub>(x<sup>n</sup>) = nlog<sub>a</sub>x</li>
+          <li><strong>Change of Base:</strong> log<sub>a</sub>b = log<sub>c</sub>b / log<sub>c</sub>a</li>
+        </ul>
+      </div>
+    </main>
+
+    <section id="quiz" class="card quiz">
+      <div class="quiz-top">
+        <div>
+          <div id="gameLabel" class="crumb">Quiz</div>
+          <h2 id="quizTitle">Question</h2>
+        </div>
+        <div id="questionPill" class="pill">Question 1 of 5</div>
+      </div>
+
+      <div class="progress-wrap">
+        <div id="progress" class="progress"></div>
+      </div>
+
+      <div id="questionText" class="question"></div>
+      <div id="options" class="options"></div>
+
+      <div class="actions">
+        <button id="homeBtn" class="btn secondary">Back to games</button>
+        <button id="nextBtn" class="btn" disabled>Next question</button>
+      </div>
+    </section>
+
+    <section id="scoreScreen" class="card score-screen">
+      <div class="crumb" id="scoreGameLabel">Quiz complete</div>
+      <div class="score-big" id="scoreEmoji">🏆</div>
+      <h2 id="scoreTitle">Great effort!</h2>
+      <p id="scoreText"></p>
+      <div class="answer-box" id="timeSummary"></div>
+      <div class="actions" style="justify-content:center;">
+        <button id="retryBtn" class="btn success">New attempt with fresh questions</button>
+        <button id="scoreHomeBtn" class="btn secondary">Back to games</button>
+      </div>
+    </section>
+  </div>
+
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h3 id="modalTitle"></h3>
+      <p id="modalMessage"></p>
+      <div id="modalAnswer" class="answer-box"></div>
+      <button id="modalContinue" class="btn">Continue</button>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL_QUESTIONS = 5;
+
+    const state = {
+      game: null,
+      questions: [],
+      current: 0,
+      score: 0,
+      startTime: null,
+      elapsedBeforePause: 0,
+      timerInterval: null,
+      paused: false,
+      answered: false,
+      selectedCorrect: false
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    const landing = $("landing");
+    const quiz = $("quiz");
+    const scoreScreen = $("scoreScreen");
+    const timerEl = $("timer");
+    const gameLabel = $("gameLabel");
+    const quizTitle = $("quizTitle");
+    const questionPill = $("questionPill");
+    const progress = $("progress");
+    const questionText = $("questionText");
+    const optionsEl = $("options");
+    const nextBtn = $("nextBtn");
+    const homeBtn = $("homeBtn");
+    const retryBtn = $("retryBtn");
+    const scoreHomeBtn = $("scoreHomeBtn");
+    const modalBackdrop = $("modalBackdrop");
+    const modalTitle = $("modalTitle");
+    const modalMessage = $("modalMessage");
+    const modalAnswer = $("modalAnswer");
+    const modalContinue = $("modalContinue");
+
+    const gameMeta = {
+      laws: {
+        title: "Laws of Logarithms",
+        label: "Identify the law",
+        instruction: "Which law of logarithms is shown?"
+      },
+      mental: {
+        title: "Mental Math",
+        label: "Evaluate mentally",
+        instruction: "Choose the exact value."
+      },
+      calculator: {
+        title: "Calculator Skills",
+        label: "Use a calculator",
+        instruction: "Choose the value to 3 significant figures."
+      }
+    };
+
+    const lawOptions = [
+      "Product Law",
+      "Quotient Law",
+      "Power Law",
+      "Change of Base",
+      "log(a + b) = log a + log b",
+      "log(a − b) = log a − log b",
+      "log(a/b) = log a ÷ log b",
+      "log(aⁿ) = (log a)ⁿ"
+    ];
+
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function choice(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+      const s = Math.floor(seconds % 60).toString().padStart(2, "0");
+      return `${m}:${s}`;
+    }
+
+    function getElapsedSeconds() {
+      if (!state.startTime) return Math.floor(state.elapsedBeforePause / 1000);
+      return Math.floor((state.elapsedBeforePause + (Date.now() - state.startTime)) / 1000);
+    }
+
+    function startTimer() {
+      state.elapsedBeforePause = 0;
+      state.startTime = Date.now();
+      state.paused = false;
+      timerEl.textContent = "00:00";
+      timerEl.style.display = "block";
+      clearInterval(state.timerInterval);
+      state.timerInterval = setInterval(() => {
+        timerEl.textContent = formatTime(getElapsedSeconds());
+      }, 250);
+    }
+
+    function pauseTimer() {
+      if (state.paused || !state.startTime) return;
+      state.elapsedBeforePause += Date.now() - state.startTime;
+      state.startTime = null;
+      state.paused = true;
+    }
+
+    function resumeTimer() {
+      if (!state.paused) return;
+      state.startTime = Date.now();
+      state.paused = false;
+    }
+
+    function stopTimer() {
+      pauseTimer();
+      clearInterval(state.timerInterval);
+      state.timerInterval = null;
+    }
+
+    function optionSet(correct, pool, count = 4) {
+      const wrongs = shuffle(pool.filter(x => x !== correct)).slice(0, count - 1);
+      return shuffle([correct, ...wrongs]);
+    }
+
+    function logHTML(base, arg) {
+      return `log<sub>${base}</sub>${arg}`;
+    }
+
+    function generateLawQuestion() {
+      const type = choice(["product", "quotient", "power", "change"]);
+      const base = choice([2, 3, 5, 7, 10, "a"]);
+      const vars = shuffle(["x", "y", "m", "n", "p", "q"]);
+      const x = vars[0], y = vars[1];
+      const pow = choice([2, 3, 4, "k", "n"]);
+      const altBase = choice(["e", 10, 2, 5, "c"]);
+      let expression, correct, explanation;
+
+      if (type === "product") {
+        expression = `${logHTML(base, `(${x}${y})`)} = ${logHTML(base, x)} + ${logHTML(base, y)}`;
+        correct = "Product Law";
+        explanation = `A product inside one logarithm becomes a sum of logarithms: log<sub>a</sub>(xy) = log<sub>a</sub>x + log<sub>a</sub>y.`;
+      } else if (type === "quotient") {
+        expression = `${logHTML(base, `(${x}/${y})`)} = ${logHTML(base, x)} − ${logHTML(base, y)}`;
+        correct = "Quotient Law";
+        explanation = `A quotient inside one logarithm becomes a difference of logarithms: log<sub>a</sub>(x/y) = log<sub>a</sub>x − log<sub>a</sub>y.`;
+      } else if (type === "power") {
+        expression = `${logHTML(base, `(${x}<sup>${pow}</sup>)`)} = ${pow}${logHTML(base, x)}`;
+        correct = "Power Law";
+        explanation = `The exponent can move to the front as a multiplier: log<sub>a</sub>(x<sup>n</sup>) = nlog<sub>a</sub>x.`;
+      } else {
+        expression = `${logHTML(base, y)} = ${logHTML(altBase, y)} ÷ ${logHTML(altBase, base)}`;
+        correct = "Change of Base";
+        explanation = `The base can be changed by dividing two logs with the same new base: log<sub>a</sub>b = log<sub>c</sub>b / log<sub>c</sub>a.`;
+      }
+
+      return {
+        prompt: `${gameMeta.laws.instruction}<br><span class="expression">${expression}</span>`,
+        answer: correct,
+        options: optionSet(correct, lawOptions),
+        explanation
+      };
+    }
+
+    function generateMentalQuestion() {
+      const templates = [
+        () => ({
+          expression: "ln(1)",
+          answer: "0",
+          explanation: "Any logarithm of 1 is 0 because the base raised to 0 equals 1."
+        }),
+        () => ({
+          expression: "lg(1)",
+          answer: "0",
+          explanation: "lg means log base 10. Since 10⁰ = 1, lg(1) = 0."
+        }),
+        () => ({
+          expression: "ln(e)",
+          answer: "1",
+          explanation: "ln means log base e. Since e¹ = e, ln(e) = 1."
+        }),
+        () => {
+          const k = randInt(2, 8);
+          return {
+            expression: `${k}ln(e)`,
+            answer: String(k),
+            explanation: `ln(e) = 1, so ${k}ln(e) = ${k} × 1 = ${k}.`
+          };
+        },
+        () => {
+          const k = randInt(2, 8);
+          return {
+            expression: `-${k}lg(10)`,
+            answer: String(-k),
+            explanation: `lg(10) = 1, so -${k}lg(10) = -${k}.`
+          };
+        },
+        () => {
+          const b = choice([2,3,4,5]);
+          const p = randInt(2, 4);
+          return {
+            expression: `log<sub>${b}</sub>(${Math.pow(b,p)})`,
+            answer: String(p),
+            explanation: `${b}<sup>${p}</sup> = ${Math.pow(b,p)}, so log<sub>${b}</sub>(${Math.pow(b,p)}) = ${p}.`
+          };
+        },
+        () => {
+          const b = choice([2,3,5,10]);
+          return {
+            expression: `log<sub>${b}</sub>(1)`,
+            answer: "0",
+            explanation: `${b}<sup>0</sup> = 1, so the answer is 0.`
+          };
+        },
+        () => ({
+          expression: "ln(e³)",
+          answer: "3",
+          explanation: "ln(e³) asks what power of e gives e³. The answer is 3."
+        }),
+        () => ({
+          expression: "lg(1000)",
+          answer: "3",
+          explanation: "lg is base 10 and 10³ = 1000."
+        }),
+        () => ({
+          expression: "log<sub>4</sub>(2)",
+          answer: "1/2",
+          explanation: "4<sup>1/2</sup> = √4 = 2."
+        })
+      ];
+
+      const q = choice(templates)();
+      const distractorsPool = ["-5", "-3", "-1", "0", "1", "2", "3", "4", "5", "1/2", "1/3", "10", "undefined"];
+      return {
+        prompt: `${gameMeta.mental.instruction}<br><span class="expression">${q.expression}</span>`,
+        answer: q.answer,
+        options: optionSet(q.answer, distractorsPool),
+        explanation: q.explanation
+      };
+    }
+
+    function roundTo3sf(x) {
+      if (x === 0) return "0";
+      const absX = Math.abs(x);
+      const decimals = Math.max(0, 2 - Math.floor(Math.log10(absX)));
+      let s = x.toFixed(decimals);
+      s = s.replace(/\.?0+$/, "");
+      return s;
+    }
+
+    function generateCalculatorQuestion() {
+      const templates = [
+        () => {
+          const b = randInt(2, 9);
+          const x = randInt(2, 99);
+          const value = Math.log(x) / Math.log(b);
+          return {
+            expression: `log<sub>${b}</sub>(${x})`,
+            value,
+            explanation: `Use change of base on a calculator: log(${x}) ÷ log(${b}) = ${roundTo3sf(value)} to 3 significant figures.`
+          };
+        },
+        () => {
+          const x = randInt(2, 90);
+          const value = Math.log(x);
+          return {
+            expression: `ln(${x})`,
+            value,
+            explanation: `Use the ln key: ln(${x}) = ${roundTo3sf(value)} to 3 significant figures.`
+          };
+        },
+        () => {
+          const x = randInt(2, 900);
+          const value = Math.log10(x);
+          return {
+            expression: `lg(${x})`,
+            value,
+            explanation: `lg means log base 10, so use the log key: log(${x}) = ${roundTo3sf(value)} to 3 significant figures.`
+          };
+        },
+        () => {
+          const b = randInt(2, 9);
+          const x = randInt(2, 20);
+          const k = randInt(2, 5);
+          const value = k * (Math.log(x) / Math.log(b));
+          return {
+            expression: `${k}log<sub>${b}</sub>(${x})`,
+            value,
+            explanation: `First calculate log<sub>${b}</sub>(${x}) using change of base, then multiply by ${k}. The value is ${roundTo3sf(value)}.`
+          };
+        }
+      ];
+
+      const q = choice(templates)();
+      const correct = roundTo3sf(q.value);
+      const numeric = Number(correct);
+      const distractors = new Set();
+
+      const offsets = [0.01, -0.01, 0.1, -0.1, 1, -1, 0.2, -0.2];
+      for (const offset of shuffle(offsets)) {
+        const candidate = roundTo3sf(q.value + offset);
+        if (candidate !== correct && Number.isFinite(Number(candidate))) distractors.add(candidate);
+        if (distractors.size >= 6) break;
+      }
+
+      if (distractors.size < 6) {
+        distractors.add(roundTo3sf(q.value * 10));
+        distractors.add(roundTo3sf(q.value / 10));
+        distractors.add(roundTo3sf(q.value + 0.5));
+      }
+
+      return {
+        prompt: `${gameMeta.calculator.instruction}<br><span class="expression">${q.expression}</span>`,
+        answer: correct,
+        options: optionSet(correct, Array.from(distractors), 4),
+        explanation: q.explanation
+      };
+    }
+
+    function generateQuestions(game) {
+      const generators = {
+        laws: generateLawQuestion,
+        mental: generateMentalQuestion,
+        calculator: generateCalculatorQuestion
+      };
+
+      const questions = [];
+      const seen = new Set();
+      let guard = 0;
+
+      while (questions.length < TOTAL_QUESTIONS && guard < 100) {
+        const q = generators[game]();
+        const key = q.prompt + "|" + q.answer;
+        if (!seen.has(key)) {
+          seen.add(key);
+          questions.push(q);
+        }
+        guard++;
+      }
+
+      return shuffle(questions);
+    }
+
+    function startGame(game) {
+      state.game = game;
+      state.questions = generateQuestions(game);
+      state.current = 0;
+      state.score = 0;
+      state.answered = false;
+      state.selectedCorrect = false;
+
+      landing.style.display = "none";
+      scoreScreen.style.display = "none";
+      quiz.style.display = "block";
+
+      gameLabel.textContent = gameMeta[game].label;
+      quizTitle.textContent = gameMeta[game].title;
+
+      startTimer();
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = state.questions[state.current];
+      state.answered = false;
+      state.selectedCorrect = false;
+
+      questionPill.textContent = `Question ${state.current + 1} of ${TOTAL_QUESTIONS}`;
+      progress.style.width = `${(state.current / TOTAL_QUESTIONS) * 100}%`;
+      questionText.innerHTML = q.prompt;
+      optionsEl.innerHTML = "";
+      nextBtn.disabled = true;
+      nextBtn.textContent = state.current === TOTAL_QUESTIONS - 1 ? "Finish quiz" : "Next question";
+
+      shuffle(q.options).forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "option";
+        btn.innerHTML = opt;
+        btn.addEventListener("click", () => selectOption(btn, opt));
+        optionsEl.appendChild(btn);
+      });
+    }
+
+    function selectOption(button, selected) {
+      if (state.answered) return;
+      state.answered = true;
+
+      const q = state.questions[state.current];
+      const correct = selected === q.answer;
+      state.selectedCorrect = correct;
+
+      [...optionsEl.children].forEach(btn => {
+        btn.disabled = true;
+        if (btn.innerHTML === q.answer) btn.classList.add("correct");
+      });
+
+      if (correct) {
+        button.classList.add("correct");
+        state.score += 1;
+        playBling();
+        launchConfetti();
+        showFeedback(true, q);
+      } else {
+        button.classList.add("wrong");
+        showFeedback(false, q);
+      }
+
+      nextBtn.disabled = false;
+    }
+
+    function showFeedback(correct, q) {
+      pauseTimer();
+      modalTitle.textContent = correct ? "Correct! Brilliant work ✨" : "Not quite — keep going 🌱";
+      modalMessage.textContent = correct
+        ? "Great job spotting the pattern."
+        : "Mistakes are useful: read the correct answer, then try the next one with fresh focus.";
+      modalAnswer.innerHTML = `<strong>Correct answer:</strong> ${q.answer}<br><br>${q.explanation}`;
+      modalBackdrop.style.display = "flex";
+      modalContinue.focus();
+    }
+
+    function closeFeedback() {
+      modalBackdrop.style.display = "none";
+      resumeTimer();
+    }
+
+    function finishQuiz() {
+      stopTimer();
+      progress.style.width = "100%";
+      quiz.style.display = "none";
+      scoreScreen.style.display = "block";
+      timerEl.style.display = "none";
+
+      const elapsed = Math.floor(state.elapsedBeforePause / 1000);
+      $("scoreGameLabel").textContent = gameMeta[state.game].title;
+      $("scoreEmoji").textContent = state.score === 5 ? "🏆" : state.score >= 3 ? "🌟" : "💪";
+      $("scoreTitle").textContent =
+        state.score === 5 ? "Perfect score!" :
+        state.score >= 3 ? "Strong attempt!" :
+        "Good effort — practise again!";
+      $("scoreText").textContent =
+        `You scored ${state.score} out of ${TOTAL_QUESTIONS}. A new attempt will create a fresh random set of questions.`;
+      $("timeSummary").innerHTML = `<strong>Time taken:</strong> ${formatTime(elapsed)}<br><strong>Tip:</strong> Try again to beat your time and strengthen accuracy.`;
+    }
+
+    function goHome() {
+      stopTimer();
+      timerEl.style.display = "none";
+      quiz.style.display = "none";
+      scoreScreen.style.display = "none";
+      landing.style.display = "block";
+      modalBackdrop.style.display = "none";
+    }
+
+    function playBling() {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+
+      const ctx = new AudioContext();
+      const now = ctx.currentTime;
+      const notes = [880, 1174.66, 1567.98];
+
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + i * 0.055);
+        gain.gain.setValueAtTime(0.0001, now + i * 0.055);
+        gain.gain.exponentialRampToValueAtTime(0.18, now + i * 0.055 + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.055 + 0.22);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * 0.055);
+        osc.stop(now + i * 0.055 + 0.24);
+      });
+    }
+
+    const confettiCanvas = $("confetti");
+    const ctx = confettiCanvas.getContext("2d");
+    let confettiPieces = [];
+    let confettiAnimation = null;
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+
+    window.addEventListener("resize", resizeConfetti);
+    resizeConfetti();
+
+    function launchConfetti() {
+      const colors = ["#3b5bdb", "#12b76a", "#f79009", "#e03131", "#845ef7", "#ffd43b"];
+      for (let i = 0; i < 120; i++) {
+        confettiPieces.push({
+          x: Math.random() * confettiCanvas.width,
+          y: -20 - Math.random() * 120,
+          w: randInt(6, 12),
+          h: randInt(8, 16),
+          color: choice(colors),
+          vx: Math.random() * 5 - 2.5,
+          vy: Math.random() * 3 + 3,
+          rotation: Math.random() * Math.PI,
+          spin: Math.random() * 0.3 - 0.15,
+          life: 140
+        });
+      }
+
+      if (!confettiAnimation) animateConfetti();
+    }
+
+    function animateConfetti() {
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+
+      confettiPieces.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.035;
+        p.rotation += p.spin;
+        p.life -= 1;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      });
+
+      confettiPieces = confettiPieces.filter(p => p.life > 0 && p.y < confettiCanvas.height + 40);
+
+      if (confettiPieces.length > 0) {
+        confettiAnimation = requestAnimationFrame(animateConfetti);
+      } else {
+        confettiAnimation = null;
+        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      }
+    }
+
+    document.querySelectorAll(".game-btn").forEach(btn => {
+      btn.addEventListener("click", () => startGame(btn.dataset.game));
+    });
+
+    homeBtn.addEventListener("click", goHome);
+    scoreHomeBtn.addEventListener("click", goHome);
+    retryBtn.addEventListener("click", () => startGame(state.game));
+
+    modalContinue.addEventListener("click", closeFeedback);
+    modalBackdrop.addEventListener("click", (event) => {
+      if (event.target === modalBackdrop) closeFeedback();
+    });
+
+    nextBtn.addEventListener("click", () => {
+      if (!state.answered) return;
+      if (state.current === TOTAL_QUESTIONS - 1) {
+        finishQuiz();
+      } else {
+        state.current += 1;
+        renderQuestion();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && modalBackdrop.style.display === "flex") {
+        closeFeedback();
+      }
+    });
+  </script>
+</body>
+</html>
